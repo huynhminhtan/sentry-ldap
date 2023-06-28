@@ -17,11 +17,11 @@ install_requires = [
 ]
 
 setup(
-    name='sentry-auth-ldap',
+    name='sentry-ldap',
     version='23.6.0',
-    author='Chad Killingsworth <chad.killingsworth@banno.com>, Barron Hagerman <barron.hagerman@banno.com>, PM Extra <pm@jubeat.net>',
-    author_email='pm@jubeat.net',
-    url='https://github.com/PMExtra/sentry-auth-ldap',
+    author='',
+    author_email='',
+    url='https://github.com/huynhminhtan/sentry-ldap',
     description='A Sentry extension to add an LDAP server as an authentication source.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -30,7 +30,7 @@ setup(
     zip_safe=False,
     install_requires=install_requires,
     include_package_data=True,
-    download_url='https://github.com/PMExtra/sentry-auth-ldap',
+    download_url='https://github.com/huynhminhtan/sentry-ldap',
     classifiers=[
         'Framework :: Django',
         'Intended Audience :: Developers',
@@ -40,8 +40,8 @@ setup(
         'Topic :: Software Development'
     ],
     project_urls={
-        'Bug Tracker': 'https://github.com/PMExtra/sentry-auth-ldap/issues',
-        'CI': 'https://github.com/PMExtra/sentry-auth-ldap/actions',
-        'Source Code': 'https://github.com/PMExtra/sentry-auth-ldap',
+        'Bug Tracker': 'https://github.com/huynhminhtan/sentry-ldap/issues',
+        'CI': 'https://github.com/huynhminhtan/sentry-ldap/actions',
+        'Source Code': 'https://github.com/huynhminhtan/sentry-ldap',
     },
 )
