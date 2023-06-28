@@ -1,7 +1,4 @@
-import logging
-import re
 from django_auth_ldap.backend import LDAPBackend
-from django_auth_ldap.config import _LDAPConfig
 from django.conf import settings
 from sentry.models import (
     Organization,
@@ -9,8 +6,10 @@ from sentry.models import (
     UserEmail,
     UserOption,
 )
+import re
+import logging
 
-logger = _LDAPConfig.get_logger()
+logger = logging.getLogger('django_auth_ldap')
 
 def _get_effective_sentry_role(ldap_user):
     role_priority_order = [
