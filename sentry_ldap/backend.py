@@ -1,3 +1,4 @@
+import re
 from django_auth_ldap.backend import LDAPBackend
 from django.conf import settings
 from sentry.models import (
@@ -33,6 +34,15 @@ def _get_effective_sentry_role(ldap_user):
 
 
 class SentryLdapBackend(LDAPBackend):
+    # Override ldap_to_django_username to preprocess the LDAP user
+    def ldap_to_django_username(self, username):
+        # Remove the domain part from the username
+        email_pattern = re.compile(r'^(.+)@')
+        match = email_pattern.match(username)
+        if match:
+            username = match.group(1)
+        return super().ldap_to_django_username(username)
+
     def get_or_build_user(self, username, ldap_user):
         (user, built) = super().get_or_build_user(username, ldap_user)
 
