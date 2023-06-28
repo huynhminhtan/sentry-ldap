@@ -57,6 +57,8 @@ class SentryLdapBackend(LDAPBackend):
 
         user.is_managed = True
 
+        self.logger.debug(f'get_or_build_user LDAP username: {username}')
+
         # Add the user email address
         mail_attr_name = self.settings.USER_ATTR_MAP.get('email', 'mail')
         mail_attr = ldap_user.attrs.get(mail_attr_name)
