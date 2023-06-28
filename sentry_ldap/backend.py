@@ -1,6 +1,7 @@
 import logging
 import re
 from django_auth_ldap.backend import LDAPBackend
+from django_auth_ldap.config import _LDAPConfig
 from django.conf import settings
 from sentry.models import (
     Organization,
@@ -9,6 +10,7 @@ from sentry.models import (
     UserOption,
 )
 
+logger = _LDAPConfig.get_logger()
 
 def _get_effective_sentry_role(ldap_user):
     role_priority_order = [
@@ -35,21 +37,17 @@ def _get_effective_sentry_role(ldap_user):
 
 
 class SentryLdapBackend(LDAPBackend):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.logger = logging.getLogger('ldap_logger')
-
     # Override ldap_to_django_username to preprocess the LDAP user
     def ldap_to_django_username(self, username):
         # Remove the domain part from the username
-        self.logger.debug(f'Preprocessed LDAP username: {username}')
+        logger.info(f'Preprocessed LDAP username: {username}')
 
         email_pattern = re.compile(r'^(.+)@')
         match = email_pattern.match(username)
         if match:
             username = match.group(1)
 
-        self.logger.debug(f'Preprocessed LDAP after username: {username}')
+        logger.info(f'Preprocessed LDAP after username: {username}')
         return super().ldap_to_django_username(username)
 
     def get_or_build_user(self, username, ldap_user):
@@ -57,7 +55,7 @@ class SentryLdapBackend(LDAPBackend):
 
         user.is_managed = True
 
-        self.logger.debug(f'get_or_build_user LDAP username: {username}')
+        logger.info(f'get_or_build_user LDAP username: {username}')
 
         # Add the user email address
         mail_attr_name = self.settings.USER_ATTR_MAP.get('email', 'mail')

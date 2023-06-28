@@ -18,7 +18,7 @@ install_requires = [
 
 setup(
     name='sentry-ldap',
-    version='1.2.1',
+    version='1.2.2',
     author='',
     author_email='',
     url='https://github.com/huynhminhtan/sentry-ldap',
