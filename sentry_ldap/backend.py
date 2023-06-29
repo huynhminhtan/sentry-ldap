@@ -66,19 +66,25 @@ class SentryLdapBackend(LDAPBackend):
 
         return user
 
+    def authenticate(
+        self, request=None, username=None, password=None, **kwargs
+    ):
+        if (
+            username.find('@') == -1
+            or username.split('@')[1].upper() != settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
+        ):
+            return None
+        ldap_user = _LDAPUser(self, username=username.split('@')[0].strip())
+        user = ldap_user.authenticate(password)
+        return user
+
     def ldap_to_django_username(self, username):
-        # Remove the domain part from the username
-        logger.info(f'ldap_to_django_username LDAP username: {username}')
-
-        # username = username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
-
-        logger.info(f'ldap_to_django_username LDAP after username: {username}')
-        # return super().ldap_to_django_username(username)
-        return username
+        """Override LDAPBackend function to get the username with domain"""
+        return username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
 
     def django_to_ldap_username(self, username):
-        logger.info(f'django_to_ldap_username LDAP username: {username}')
-        return username
+        """Override LDAPBackend function to get the real LDAP username"""
+        return username.split('@')[0]
 
     def get_or_build_user(self, username, ldap_user):
         (user, built) = super().get_or_build_user(username, ldap_user)
@@ -93,7 +99,8 @@ class SentryLdapBackend(LDAPBackend):
         if mail_attr:
             email = mail_attr[0]
         elif hasattr(settings, 'AUTH_LDAP_DEFAULT_EMAIL_DOMAIN'):
-            email = username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
+            # email = username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
+            email = username
         else:
             email = None
 
