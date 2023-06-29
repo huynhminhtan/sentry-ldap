@@ -70,7 +70,7 @@ class SentryLdapBackend(LDAPBackend):
         # Remove the domain part from the username
         logger.info(f'ldap_to_django_username LDAP username: {username}')
 
-        # username = username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
+        username = username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
 
         logger.info(f'ldap_to_django_username LDAP after username: {username}')
         return super().ldap_to_django_username(username)
