@@ -1,9 +1,5 @@
 name: sentry-auth-ldap CI
 
-#on:
-#  release:
-#    types: [published]
-
 on: push
 
 jobs:
