@@ -50,6 +50,21 @@ class SentryLdapBackend(LDAPBackend):
     #     logger.info(f'Preprocessed LDAP after username: {username}')
     #     return super().ldap_to_django_username(username)
 
+    # Override ldap_to_django_username to preprocess the LDAP user
+    def ldap_to_django_username(self, username):
+        # Remove the domain part from the username
+        logger.info(f'ldap_to_django_username LDAP username: {username}')
+
+        username = username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
+
+        logger.info(f'ldap_to_django_username LDAP after username: {username}')
+        return super().ldap_to_django_username(username)
+
+    def django_to_ldap_username(self, username):
+        logger.info(f'django_to_ldap_username LDAP username: {username}')
+
+        return username
+
     def authenticate(self, request=None, username=None, password=None, **kwargs):
         logger.info(f'Custom authenticate LDAP username: {username}')
 
