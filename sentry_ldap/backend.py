@@ -1,4 +1,4 @@
-from django_auth_ldap.backend import LDAPBackend
+from django_auth_ldap.backend import LDAPBackend, _LDAPUser
 from django.conf import settings
 from sentry.models import (
     Organization,
@@ -10,6 +10,7 @@ import re
 import logging
 
 logger = logging.getLogger('django_auth_ldap')
+
 
 def _get_effective_sentry_role(ldap_user):
     role_priority_order = [
@@ -36,18 +37,34 @@ def _get_effective_sentry_role(ldap_user):
 
 
 class SentryLdapBackend(LDAPBackend):
-    # Override ldap_to_django_username to preprocess the LDAP user
-    def ldap_to_django_username(self, username):
-        # Remove the domain part from the username
-        logger.info(f'Preprocessed LDAP username: {username}')
+    # # Override ldap_to_django_username to preprocess the LDAP user
+    # def ldap_to_django_username(self, username):
+    #     # Remove the domain part from the username
+    #     logger.info(f'Preprocessed LDAP username: {username}')
+    #
+    #     email_pattern = re.compile(r'^(.+)@')
+    #     match = email_pattern.match(username)
+    #     if match:
+    #         username = match.group(1)
+    #
+    #     logger.info(f'Preprocessed LDAP after username: {username}')
+    #     return super().ldap_to_django_username(username)
 
-        email_pattern = re.compile(r'^(.+)@')
-        match = email_pattern.match(username)
-        if match:
-            username = match.group(1)
+    def authenticate(self, request=None, username=None, password=None, **kwargs):
+        logger.info(f'Custom authenticate LDAP username: {username}')
 
-        logger.info(f'Preprocessed LDAP after username: {username}')
-        return super().ldap_to_django_username(username)
+        if username.find("@") == -1:
+            logger.debug('Rejecting not mail for %s' % username)
+            return None
+
+        if bool(password) or self.settings.PERMIT_EMPTY_PASSWORD:
+            ldap_user = _LDAPUser(self, username=username.split("@")[0].strip())
+            user = ldap_user.authenticate(password)
+        else:
+            logger.debug('Rejecting empty password for %s' % username)
+            user = None
+
+        return user
 
     def get_or_build_user(self, username, ldap_user):
         (user, built) = super().get_or_build_user(username, ldap_user)
