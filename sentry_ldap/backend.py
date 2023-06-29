@@ -50,21 +50,6 @@ class SentryLdapBackend(LDAPBackend):
     #     logger.info(f'Preprocessed LDAP after username: {username}')
     #     return super().ldap_to_django_username(username)
 
-    # Override ldap_to_django_username to preprocess the LDAP user
-    def ldap_to_django_username(self, username):
-        # Remove the domain part from the username
-        logger.info(f'ldap_to_django_username LDAP username: {username}')
-
-        username = username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
-
-        logger.info(f'ldap_to_django_username LDAP after username: {username}')
-        return super().ldap_to_django_username(username)
-
-    def django_to_ldap_username(self, username):
-        logger.info(f'django_to_ldap_username LDAP username: {username}')
-
-        return username
-
     def authenticate(self, request=None, username=None, password=None, **kwargs):
         logger.info(f'Custom authenticate LDAP username: {username}')
 
@@ -80,6 +65,19 @@ class SentryLdapBackend(LDAPBackend):
             user = None
 
         return user
+
+    def ldap_to_django_username(self, username):
+        # Remove the domain part from the username
+        logger.info(f'ldap_to_django_username LDAP username: {username}')
+
+        # username = username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
+
+        logger.info(f'ldap_to_django_username LDAP after username: {username}')
+        return super().ldap_to_django_username(username)
+
+    def django_to_ldap_username(self, username):
+        logger.info(f'django_to_ldap_username LDAP username: {username}')
+        return username
 
     def get_or_build_user(self, username, ldap_user):
         (user, built) = super().get_or_build_user(username, ldap_user)
@@ -104,12 +102,12 @@ class SentryLdapBackend(LDAPBackend):
         user.save()
 
         if mail_attr and getattr(settings, 'AUTH_LDAP_MAIL_VERIFIED', False):
-            defaults = { 'is_verified': True }
+            defaults = {'is_verified': True}
         else:
             defaults = None
 
         for mail in mail_attr or [email]:
-            UserEmail.objects.update_or_create(defaults = defaults, user=user, email=mail)
+            UserEmail.objects.update_or_create(defaults=defaults, user=user, email=mail)
 
         # Check to see if we need to add the user to an organization
         organization_slug = getattr(settings, 'AUTH_LDAP_SENTRY_DEFAULT_ORGANIZATION', None)
@@ -127,7 +125,8 @@ class SentryLdapBackend(LDAPBackend):
         if not organizations or len(organizations) < 1:
             return (user, built)
 
-        member_role = _get_effective_sentry_role(ldap_user) or getattr(settings, 'AUTH_LDAP_SENTRY_ORGANIZATION_ROLE_TYPE', None)
+        member_role = _get_effective_sentry_role(ldap_user) or getattr(settings,
+                                                                       'AUTH_LDAP_SENTRY_ORGANIZATION_ROLE_TYPE', None)
 
         has_global_access = getattr(settings, 'AUTH_LDAP_SENTRY_ORGANIZATION_GLOBAL_ACCESS', False)
 
