@@ -69,20 +69,26 @@ class SentryLdapBackend(LDAPBackend):
     def authenticate(
         self, request=None, username=None, password=None, **kwargs
     ):
-        if (
-            username.find('@') == -1
-            or username.split('@')[1].upper() != settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
-        ):
-            return None
+        logger.info(f'Custom authenticate LDAP username: {username}')
+
+        # if (
+        #     username.find('@') == -1
+        #     or username.split('@')[1] != settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
+        # ):
+        #     return None
         ldap_user = _LDAPUser(self, username=username.split('@')[0].strip())
         user = ldap_user.authenticate(password)
         return user
 
     def ldap_to_django_username(self, username):
+        logger.info(f'ldap_to_django_username LDAP username: {username}')
+
         """Override LDAPBackend function to get the username with domain"""
         return username + '@' + settings.AUTH_LDAP_DEFAULT_EMAIL_DOMAIN
 
     def django_to_ldap_username(self, username):
+        logger.info(f'django_to_ldap_username LDAP username: {username}')
+
         """Override LDAPBackend function to get the real LDAP username"""
         return username.split('@')[0]
 
